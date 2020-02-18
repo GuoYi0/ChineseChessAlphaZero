@@ -20,7 +20,7 @@ class CChessModel(object):
         self.value_labels = tf.placeholder(tf.float32, (None,), name="value_labels")
         self.weights = tf.placeholder(tf.float32, (None,), name="weights")
         self.training = tf.placeholder(tf.bool, (), "training")  # 现在是在训练还是测试。用于BN
-        self.policy, self.value = None, None  # 输出
+        self.policy, self.value, self.prob = None, None, None  # 输出
         self.xentropy_loss, self.value_loss, self.L2_loss, self.total_loss = None, None, None, None
         self.journalist, self.summury_op = None, None
         self.opt = None
@@ -72,6 +72,7 @@ class CChessModel(object):
             last_dim = reduce(lambda x, y: x * y, policy.get_shape().as_list()[1:])
             policy = tf.reshape(policy, (-1, last_dim))
             self.policy = tf.layers.dense(policy, self.n_labels, activation=None, name="fc")
+            self.prob = tf.nn.softmax(self.policy, axis=1)
 
         with tf.variable_scope("value"):
             value = tf.layers.conv2d(f, 4, 1, padding="SAME", data_format=DATA_FORMAT, use_bias=False, name="conv1")
@@ -122,3 +123,8 @@ class CChessModel(object):
             print("Successfully loaded:", checkpoint.model_checkpoint_path)
         else:
             self.saver.restore(self.sess, ckpt_path)
+
+    def eval(self, inputs):
+        prob, value = self.sess.run([self.prob, self.value], feed_dict={self.inputs: inputs, self.training: False})
+        return prob, value
+

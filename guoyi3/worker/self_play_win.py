@@ -5,6 +5,9 @@ from multiprocessing import Manager
 from agent.MCTS import MCTS
 
 class SelfPlayWorker(object):
+    """
+    负责训练
+    """
     # def __init__(self, config):
     def __init__(self, cfg=None):
         self.config = config

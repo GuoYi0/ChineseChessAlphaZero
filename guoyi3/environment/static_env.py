@@ -13,7 +13,7 @@ BOARD_WIDTH = 9  # q棋盘宽度
 def done(state, turns=-1, need_check=False):
     """
     判断游戏是否结束，如果对将了，判断红胜
-    只检查红方
+    只检查红方，红方是大写字母
     :param state: 一个字符串
     :param turns:
     :param need_check:
@@ -24,8 +24,6 @@ def done(state, turns=-1, need_check=False):
         return True, 1, None  # 红胜返回1
     if 'S' not in state:
         return True, -1, None
-    # if turns > 0 and turns < 20:
-    #     return (False, 0, None)
     # "rnbakabnr"格式，并且切换了大小写，使得红小写，黑大写，红上黑下
     board = state_to_board(state)
     red_k, black_k = [0, 0], [0, 0]
@@ -53,7 +51,7 @@ def done(state, turns=-1, need_check=False):
                 has_block = True
                 break
             i += 1
-        if not has_block:  # 确实对将了，判断红胜
+        if not has_block:  # 确实对将了，因为current player是红方，对将肯定是黑方造成的，所以判断红胜
             v = 1
             winner = Winner.red
     final_move = None
@@ -70,14 +68,12 @@ def done(state, turns=-1, need_check=False):
     if winner is None and need_check:
         black_state = fliped_state(state)
         black_moves = get_legal_moves(black_state)
-        # render(black_state)
         red_k[0] = 9 - red_k[0]
         red_k[1] = 8 - red_k[1]
         for mov in black_moves:
             dest = [int(mov[3]), int(mov[2])]
-            if dest == red_k:
+            if dest == red_k:  # 当前局面红方处于被将军状态
                 check = True
-                # logger.debug(f"Checking move {mov}")
                 break
         # logger.debug(f"red_k = {red_k}, black_moves = {black_moves}, check = {check}")
     if need_check:
@@ -118,12 +114,12 @@ def be_catched(state, mov):
 
 def will_check_or_catch(ori_state, action):
     """
-    判断基于状态ori_state执行action是否会造成红方被将军或者捉子
+    判断ori_state 执行action的动作是否在捉子或者将军
     :param ori_state:
     :param action:
     :return:
     """
-    state = step(ori_state, action)  # 判断当前state的红方是否会被将/捉
+    state = step(ori_state, action)
     board = state_to_board(state)
     red_k = [0, 0]
     for i in range(BOARD_HEIGHT):
@@ -268,7 +264,8 @@ def swapcase(a, s2b=False):
 
 def get_legal_moves(state, board=None):
     """
-    依据小写字母来检查所有合法move，返回一个列表
+    依据state中的大写字母来检查所有合法move，返回一个列表
+    但是board里面切换了大写小，board里面以小写字母的判断
     :param state:
     :param board:
     :return:
@@ -389,3 +386,15 @@ def state_to_planes(state):
             else:
                 j += int(letter)
     return planes
+
+def has_attack_chessman(state):
+    """
+    判断是否还有可进攻棋子
+    :param state:
+    :return:
+    """
+    for chessman in state:
+        c = chessman.lower()
+        if c == 'r' or c == 'k' or c == 'p' or c == 'c':
+            return True
+    return False
