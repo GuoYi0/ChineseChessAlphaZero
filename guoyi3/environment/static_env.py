@@ -14,7 +14,7 @@ def done(state, turns=-1, need_check=False):
     """
     判断游戏是否结束，如果对将了，判断红胜
     只检查红方，红方是大写字母
-    :param state: 一个字符串
+    :param state: 一个字符串形如'rkemsmekr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RKEMSMEKR'
     :param turns:
     :param need_check:
     :return:
@@ -24,7 +24,7 @@ def done(state, turns=-1, need_check=False):
         return True, 1, None  # 红胜返回1
     if 'S' not in state:
         return True, -1, None
-    # "rnbakabnr"格式，并且切换了大小写，使得红小写，黑大写，红上黑下
+    # 转换为"rnbakabnr"格式，并且切换了大小写，使得红小写，黑大写，红上黑下
     board = state_to_board(state)
     red_k, black_k = [0, 0], [0, 0]
     winner = None

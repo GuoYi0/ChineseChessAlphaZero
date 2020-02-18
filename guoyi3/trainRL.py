@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from worker.self_play_win import SelfPlayWorker
 import os
 import config_rl as cfg
 from collections import defaultdict
@@ -15,6 +14,7 @@ def main():
     if cfg.pretrained_model is not None:
         network.restore(cfg.pretrained_model)
     player = CChessPlayer(cfg, defaultdict(State), pv_fn=network.eval)
+    data = player.run()
 
 
 

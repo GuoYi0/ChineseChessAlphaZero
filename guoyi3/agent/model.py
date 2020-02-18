@@ -25,7 +25,7 @@ class CChessModel(object):
         self.journalist, self.summury_op = None, None
         self.opt = None
         self.global_step = tf.get_variable("global_step", dtype=tf.int32, initializer=0, trainable=False)
-        self.lr = tf.get_variable("lr", dtype=tf.float32, initializer=self.config.Train.init_lr, trainable=False)
+        self.lr = tf.get_variable("lr", dtype=tf.float32, initializer=self.config.init_lr, trainable=False)
         self.build_network()
         self.build_train_loop()
         self.sess = tf.Session()
@@ -37,7 +37,7 @@ class CChessModel(object):
         self.add_summary()
 
     def add_summary(self):
-        self.journalist = tf.summary.FileWriter(self.config.Train.log_dir, flush_secs=10)
+        self.journalist = tf.summary.FileWriter(self.config.log_dir, flush_secs=10)
         tf.summary.scalar("policy_loss", self.xentropy_loss)
         tf.summary.scalar("value_loss", self.value_loss)
         tf.summary.scalar("total_loss", self.total_loss)
@@ -50,11 +50,11 @@ class CChessModel(object):
                        self.value_labels: value_labels, self.training: True, self.weights: weights})
         step = self.sess.run(self.global_step)
         self.journalist.add_summary(sum_res, step)
-        if step % self.config.Train.step_ckpt == 0:
+        if step % self.config.step_ckpt == 0:
             self.saver.save(
                 self.sess, save_path=os.path.join(self.config.Train.ckpt_path, "chineseChess"), global_step=step)
-        if step % self.config.Train.lr_step == 0:
-            self.sess.run(tf.assign(self.lr, self.sess.run(self.lr) * self.config.Train.lr_decay))
+        # if step % self.config.Train.lr_step == 0:
+        #     self.sess.run(tf.assign(self.lr, self.sess.run(self.lr) * self.config.Train.lr_decay))
 
         return step, xentropy_loss, value_loss, total_loss
 
